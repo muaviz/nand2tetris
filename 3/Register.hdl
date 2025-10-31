@@ -1,0 +1,39 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+/**
+ * 16-bit register:
+ * If load is asserted, the register's value is set to in;
+ * Otherwise, the register maintains its current value:
+ * if (load(t)) out(t+1) = int(t), else out(t+1) = out(t)
+ */
+CHIP Register {
+    IN in[16], load;
+    OUT out[16];
+
+    PARTS:
+    Mux16(
+    a[0]=loop0, a[1]=loop1, a[2]=loop2, a[3]=loop3, a[4]=loop4, a[5]=loop5, a[6]=loop6, a[7]=loop7, 
+    a[8]=loop8, a[9]=loop9, a[10]=loop10, a[11]=loop11, a[12]=loop12, a[13]=loop13, a[14]=loop14, a[15]=loop15, 
+    b=in, sel=load, 
+    out[0]=m0, out[1]=m1, out[2]=m2, out[3]=m3, out[4]=m4, out[5]=m5, out[6]=m6, out[7]=m7, 
+    out[8]=m8, out[9]=m9, out[10]=m10, out[11]=m11, out[12]=m12, out[13]=m13, out[14]=m14, out[15]=m15, 
+  );
+
+    DFF(in=m0, out=loop0, out=out[0]);
+    DFF(in=m1, out=loop1, out=out[1]);
+    DFF(in=m2, out=loop2, out=out[2]);
+    DFF(in=m3, out=loop3, out=out[3]);
+    DFF(in=m4, out=loop4, out=out[4]);
+    DFF(in=m5, out=loop5, out=out[5]);
+    DFF(in=m6, out=loop6, out=out[6]);
+    DFF(in=m7, out=loop7, out=out[7]);
+    DFF(in=m8, out=loop8, out=out[8]);
+    DFF(in=m9, out=loop9, out=out[9]);
+    DFF(in=m10, out=loop10, out=out[10]);
+    DFF(in=m11, out=loop11, out=out[11]);
+    DFF(in=m12, out=loop12, out=out[12]);
+    DFF(in=m13, out=loop13, out=out[13]);
+    DFF(in=m14, out=loop14, out=out[14]);
+    DFF(in=m15, out=loop15, out=out[15]);
+}
