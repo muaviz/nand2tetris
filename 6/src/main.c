@@ -22,7 +22,11 @@ int main(int argc, char *argv[]) {
     return 3;
   }
 
-  if (convert_binary() != 0) {
+  if (classify() != 0) {
     return 4;
+  }
+
+  if (convert_binary() != 0) {
+    return 5;
   }
 }

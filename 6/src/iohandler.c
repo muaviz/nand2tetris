@@ -23,7 +23,6 @@ void name_init(char *ASM) {
   char *base = strdup(ASM_NAME);
   char *token = strtok(base, ".");
   if (token != NULL) {
-    // strcpy(HACK_NAME, strcat(token, ".hack"));
     HACK_NAME = strcat(token, ".hack");
   }
 }
@@ -54,11 +53,22 @@ int no_whitespaces() {
   return 0;
 }
 
+int classify() {
+  WSP_ptr = fopen(WSP_ASM, "r");
+  if (WSP_ptr == NULL) {
+    perror("Couldn't open the file\n");
+    return 4;
+  }
+  classifier(WSP_ptr);
+  fclose(WSP_ptr);
+  return 0;
+}
+
 int convert_binary() {
   HACK_ptr = fopen(HACK_NAME, "w");
   if (HACK_ptr == NULL) {
     perror("Couldn't open the file!\n");
-    return 4;
+    return 5;
   }
   fputs("INCOMPLETE!!!\n", HACK_ptr);
   fclose(HACK_ptr);

@@ -26,3 +26,15 @@ void remove_whitespaces(FILE *src, FILE *dest) {
     }
   }
 }
+
+void classifier(FILE *src) {
+  while (fgets(line, sizeof(line), src)) {
+    if (line[0] == '@') {
+      int value = atoi(line + 1);
+      printf("%d\n", value);
+    } else {
+      char *text = line;
+      printf("%s", text);
+    }
+  }
+}
