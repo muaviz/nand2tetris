@@ -1,4 +1,5 @@
 #include "preprocessor.h"
+#include "string.h"
 
 char line[256];
 
@@ -23,18 +24,6 @@ void remove_whitespaces(FILE *src, FILE *dest) {
       if (line[i] != ' ' && line[i] != '\t') {
         fputc(line[i], dest);
       }
-    }
-  }
-}
-
-void classifier(FILE *src) {
-  while (fgets(line, sizeof(line), src)) {
-    if (line[0] == '@') {
-      int value = atoi(line + 1);
-      printf("%d\n", value);
-    } else {
-      char *text = line;
-      printf("%s", text);
     }
   }
 }

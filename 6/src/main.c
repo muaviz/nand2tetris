@@ -1,5 +1,4 @@
 #include "iohandler.h"
-#include "preprocessor.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -22,7 +21,7 @@ int main(int argc, char *argv[]) {
     return 3;
   }
 
-  if (classify() != 0) {
+  if (parse() != 0) {
     return 4;
   }
 

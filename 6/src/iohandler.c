@@ -1,4 +1,8 @@
 #include "iohandler.h"
+#include "parser.h"
+#include "preprocessor.h"
+#include <stdio.h>
+#include <string.h>
 
 // Declarations
 char *ASM_NAME;
@@ -53,13 +57,16 @@ int no_whitespaces() {
   return 0;
 }
 
-int classify() {
+int parse() {
+  char buff[256];
   WSP_ptr = fopen(WSP_ASM, "r");
   if (WSP_ptr == NULL) {
     perror("Couldn't open the file\n");
     return 4;
   }
-  classifier(WSP_ptr);
+  while (fgets(buff, sizeof(buff), WSP_ptr)) {
+    parser(buff);
+  }
   fclose(WSP_ptr);
   return 0;
 }
