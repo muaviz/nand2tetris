@@ -1,32 +1,41 @@
 #include "parser.h"
+#include "code.h"
+#include "iohandler.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 void parser(char *buff) {
-  char *dest;
-  char *comp;
-  char *jmp;
+  ld.dest = NULL;
+  ld.comp = NULL;
+  ld.jmp = NULL;
   if (buff[0] == '@') {
-    int value = atoi(buff + 1);
-    printf("%d\n", value);
+    ld.type = 'A';
+    ld.value = atoi(buff + 1);
   } else {
-    if (buff[1] == '=') {
-      dest = strtok(buff, "=");
-      comp = strtok(NULL, ";");
-      jmp = strtok(NULL, ";");
+    ld.type = 'C';
+    if (buff[1] == '=' || buff[2] == '=' || buff[3] == '=') {
+      ld.dest = strtok(buff, "=");
+      ld.comp = strtok(NULL, ";");
+      ld.jmp = strtok(NULL, ";");
     } else {
-      dest = NULL;
-      comp = strtok(buff, ";");
-      jmp = strtok(NULL, ";");
+      ld.dest = NULL;
+      ld.comp = strtok(buff, ";");
+      ld.jmp = strtok(NULL, ";");
     }
   }
-  if (jmp == NULL) {
-    comp[strcspn(comp, "\n")] = '\0';
-  } else {
-    jmp[strcspn(jmp, "\n")] = '\0';
+  if (ld.dest) {
+    ld.dest[strcspn(ld.dest, "\r\n")] = '\0';
   }
-  printf("%s", dest);
-  printf("%s", comp);
-  printf("%s", jmp);
+  if (ld.comp)
+    ld.comp[strcspn(ld.comp, "\r\n")] = '\0';
+  if (ld.jmp)
+    ld.jmp[strcspn(ld.jmp, "\r\n")] = '\0';
+
+  if (ld.dest == NULL) {
+    ld.dest = "null";
+  }
+  if (ld.jmp == NULL) {
+    ld.jmp = "null";
+  }
 }

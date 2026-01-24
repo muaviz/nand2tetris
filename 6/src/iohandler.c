@@ -1,4 +1,5 @@
 #include "iohandler.h"
+#include "code.h"
 #include "parser.h"
 #include "preprocessor.h"
 #include <stdio.h>
@@ -15,6 +16,8 @@ FILE *WSP_ptr;
 FILE *HACK_ptr;
 
 // Initialisations
+int first_line = 1;
+
 void name_init(char *ASM) {
   ASM_NAME = ASM;
   COM_ASM = "nocomments.asm";
@@ -57,27 +60,34 @@ int no_whitespaces() {
   return 0;
 }
 
-int parse() {
+int translate() {
+  char inst[17];
   char buff[256];
   WSP_ptr = fopen(WSP_ASM, "r");
-  if (WSP_ptr == NULL) {
+  HACK_ptr = fopen(HACK_NAME, "a");
+  if (WSP_ptr == NULL || HACK_ptr == NULL) {
     perror("Couldn't open the file\n");
     return 4;
   }
   while (fgets(buff, sizeof(buff), WSP_ptr)) {
+    // char *typtr = &type;
+    // memcpy(typtr, parser(buff), sizeof(char));
     parser(buff);
+    cnvrt(&ld, inst);       // fills inst
+    writeb(HACK_ptr, inst); // sends inst to file
   }
   fclose(WSP_ptr);
+  fclose(HACK_ptr);
   return 0;
 }
 
-int convert_binary() {
-  HACK_ptr = fopen(HACK_NAME, "w");
-  if (HACK_ptr == NULL) {
-    perror("Couldn't open the file!\n");
-    return 5;
+int writeb(FILE *dst, char ins[17]) {
+  if (first_line) {
+    fprintf(dst, "%s", ins);
+    first_line = 0;
+  } else {
+    ins[16] = '\0';
+    fprintf(dst, "\n%s", ins);
   }
-  fputs("INCOMPLETE!!!\n", HACK_ptr);
-  fclose(HACK_ptr);
   return 0;
 }
