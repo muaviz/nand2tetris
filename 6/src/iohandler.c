@@ -2,16 +2,19 @@
 #include "code.h"
 #include "parser.h"
 #include "preprocessor.h"
+#include "symb.h"
 #include <stdio.h>
 #include <string.h>
 
 // Declarations
 char *ASM_NAME;
 char *COM_ASM;
+char *IM_ASM;
 char *WSP_ASM;
 char *HACK_NAME;
 FILE *ASM_ptr;
 FILE *COM_ptr;
+FILE *IM_ptr;
 FILE *WSP_ptr;
 FILE *HACK_ptr;
 
@@ -21,11 +24,8 @@ int first_line = 1;
 void name_init(char *ASM) {
   ASM_NAME = ASM;
   COM_ASM = "nocomments.asm";
+  IM_ASM = "intermediate.asm";
   WSP_ASM = "nowhitespaces.asm";
-
-  // strcpy(ASM_NAME, ASM);
-  // strcpy(COM_ASM, "nocomments.asm");
-  // strcpy(WSP_ASM, "nowhitespaces.asm");
 
   char *base = strdup(ASM_NAME);
   char *token = strtok(base, ".");
@@ -49,13 +49,32 @@ int no_comments() {
 
 int no_whitespaces() {
   COM_ptr = fopen(COM_ASM, "r");
+  IM_ptr = fopen(IM_ASM, "w+");
   WSP_ptr = fopen(WSP_ASM, "w");
   if (COM_ptr == NULL || WSP_ptr == NULL) {
     perror("Couldn't open the file!\n");
     return 3;
   }
-  remove_whitespaces(COM_ptr, WSP_ptr);
+  remove_whitespaces(COM_ptr, IM_ptr);
+  rewind(IM_ptr);
+  remove_whitespaces(IM_ptr, WSP_ptr);
   fclose(COM_ptr);
+  fclose(WSP_ptr);
+  return 0;
+}
+
+int first_pass() {
+  char buff[1024] = {0};
+  printf("hello");
+  printf("%s", buff);
+  WSP_ptr = fopen(WSP_ASM, "r");
+  if (WSP_ptr == NULL) {
+    perror("Couldn't open the file\n");
+    return 9;
+  }
+  while (fgets(buff, sizeof(buff), WSP_ptr)) {
+    symblookup(buff);
+  }
   fclose(WSP_ptr);
   return 0;
 }
@@ -70,11 +89,11 @@ int translate() {
     return 4;
   }
   while (fgets(buff, sizeof(buff), WSP_ptr)) {
-    // char *typtr = &type;
-    // memcpy(typtr, parser(buff), sizeof(char));
-    parser(buff);
-    cnvrt(&ld, inst);       // fills inst
-    writeb(HACK_ptr, inst); // sends inst to file
+    if (buff[0] != '(') {
+      parser(buff);
+      cnvrt(&ld, inst);       // fills inst
+      writeb(HACK_ptr, inst); // sends inst to file
+    }
   }
   fclose(WSP_ptr);
   fclose(HACK_ptr);

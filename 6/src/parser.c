@@ -2,7 +2,6 @@
 #include "code.h"
 #include "iohandler.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 void parser(char *buff) {
@@ -11,7 +10,7 @@ void parser(char *buff) {
   ld.jmp = NULL;
   if (buff[0] == '@') {
     ld.type = 'A';
-    ld.value = atoi(buff + 1);
+    ld.value = buff + 1;
   } else {
     ld.type = 'C';
     if (buff[1] == '=' || buff[2] == '=' || buff[3] == '=') {
@@ -24,13 +23,14 @@ void parser(char *buff) {
       ld.jmp = strtok(NULL, ";");
     }
   }
-  if (ld.dest) {
+  if (ld.dest)
     ld.dest[strcspn(ld.dest, "\r\n")] = '\0';
-  }
   if (ld.comp)
     ld.comp[strcspn(ld.comp, "\r\n")] = '\0';
   if (ld.jmp)
     ld.jmp[strcspn(ld.jmp, "\r\n")] = '\0';
+  if (ld.value)
+    ld.value[strcspn(ld.value, "\r\n")] = '\0';
 
   if (ld.dest == NULL) {
     ld.dest = "null";

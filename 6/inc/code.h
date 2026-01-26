@@ -1,5 +1,5 @@
 typedef struct {
-  int value;
+  char *value;
   char *dest;
   char *comp;
   char *jmp;

@@ -21,6 +21,11 @@ int main(int argc, char *argv[]) {
     return 3;
   }
 
+  // Resolving symbols and adding them to the table
+  if (first_pass() != 0) {
+    return 9;
+  }
+
   if (translate() != 0) {
     return 4;
   }

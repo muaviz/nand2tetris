@@ -1,6 +1,6 @@
 # Compiler and flags
 CC := gcc
-CFLAGS := -ggdb -g3 -O0 -pedantic-errors -Wall -Wextra -Wconversion -Wsign-conversion -Werror -Iinc
+CFLAGS := -ggdb -g3 -g -O0 -pedantic-errors -Wall -Wextra -Wconversion -Wsign-conversion -Werror -Iinc
 
 # Directories
 SRC_DIR := src
