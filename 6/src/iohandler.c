@@ -65,8 +65,6 @@ int no_whitespaces() {
 
 int first_pass() {
   char buff[1024] = {0};
-  printf("hello");
-  printf("%s", buff);
   WSP_ptr = fopen(WSP_ASM, "r");
   if (WSP_ptr == NULL) {
     perror("Couldn't open the file\n");
