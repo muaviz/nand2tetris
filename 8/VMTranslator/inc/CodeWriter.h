@@ -11,6 +11,9 @@ public:
   void emitUnaryOperation(std::string op);
   void emitCompOperation(std::string op);
   void setFileName(const std::string &fileName);
+  void writeLabel(std::string label);
+  void writeGoto(std::string label);
+  void writeIf(std::string label);
 
 private:
   std::ofstream file;

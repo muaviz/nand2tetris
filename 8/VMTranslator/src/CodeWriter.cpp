@@ -287,3 +287,15 @@ void CodeWriter::emitCompOperation(std::string op) {
 
   labelCounter++;
 }
+
+void CodeWriter::writeLabel(std::string label) {
+  file << "(" << label << ")\n";
+}
+
+void CodeWriter::writeGoto(std::string label) {
+  file << "@" << label << "\n0;JMP\n";
+}
+
+void CodeWriter::writeIf(std::string label) {
+  file << "@SP\n" << "AM=M-1\n" << "D=M\n" << "@" << label << "\nD;JNE\n";
+}

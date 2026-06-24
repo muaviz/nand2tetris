@@ -61,6 +61,12 @@ void TranslationHandler(std::filesystem::path src, CodeWriter &C) {
       C.WritePushPop(CMD_TYPE::C_PUSH, P.arg1(), P.arg2());
     } else if (type == CMD_TYPE::C_POP) {
       C.WritePushPop(CMD_TYPE::C_POP, P.arg1(), P.arg2());
+    } else if (type == CMD_TYPE::C_LABEL) {
+      C.writeLabel(P.arg1());
+    } else if (type == CMD_TYPE::C_GOTO) {
+      C.writeGoto(P.arg1());
+    } else if (type == CMD_TYPE::C_IF) {
+      C.writeIf(P.arg1());
     }
   }
 }
