@@ -2,20 +2,21 @@
 #include <iostream>
 #include <stdexcept>
 
-CodeWriter::CodeWriter(std::string fileName) : outputFile(fileName) {
+CodeWriter::CodeWriter(const std::string &fileName) : outputFile(fileName) {
   file.open(outputFile);
   if (!file.is_open()) {
     std::cerr << "Error opening file." << std::endl;
     throw std::runtime_error("Error opening file");
   }
   labelCounter = 0;
+  returnCounter = 0;
 }
 
 void CodeWriter::setFileName(const std::string &fileName) {
   currentFileName = fileName;
 }
 
-void CodeWriter::WriteArithmetic(std::string command) {
+void CodeWriter::WriteArithmetic(const std::string &command) {
   if (command == "add") {
     emitBinaryOperation("D+M");
   } else if (command == "sub") {
@@ -37,7 +38,8 @@ void CodeWriter::WriteArithmetic(std::string command) {
   }
 }
 
-void CodeWriter::WritePushPop(CMD_TYPE command, std::string segment, int i) {
+void CodeWriter::WritePushPop(CMD_TYPE command, const std::string &segment,
+                              int i) {
 
   std::string filename = outputFile;
 
@@ -231,7 +233,7 @@ void CodeWriter::WritePushPop(CMD_TYPE command, std::string segment, int i) {
 //     D = M
 //     A = A - 1
 //     M = D (op) M
-void CodeWriter::emitBinaryOperation(std::string expr) {
+void CodeWriter::emitBinaryOperation(const std::string &expr) {
   file << "@SP\n"
        << "AM=M-1\n"
        << "D=M\n"
@@ -243,7 +245,7 @@ void CodeWriter::emitBinaryOperation(std::string expr) {
 //     @SP
 //     A = M - 1
 //     M = (op)M
-void CodeWriter::emitUnaryOperation(std::string op) {
+void CodeWriter::emitUnaryOperation(const std::string &op) {
   file << "@SP\n"
        << "A=M-1\n"
        << "M=" << op << "M\n";
@@ -267,7 +269,7 @@ void CodeWriter::emitUnaryOperation(std::string op) {
 //     M = -1
 //     (END_i)
 //
-void CodeWriter::emitCompOperation(std::string op) {
+void CodeWriter::emitCompOperation(const std::string &op) {
   file << "@SP\n"
        << "AM=M-1\n"
        << "D=M\n"
@@ -288,21 +290,21 @@ void CodeWriter::emitCompOperation(std::string op) {
   labelCounter++;
 }
 
-void CodeWriter::writeLabel(const std::string label) {
+void CodeWriter::writeLabel(const std::string &label) {
   file << "(" << label << ")\n";
 }
 
-void CodeWriter::writeGoto(const std::string label) {
+void CodeWriter::writeGoto(const std::string &label) {
   file << "@" << label << "\n0;JMP\n";
 }
 
-void CodeWriter::writeIf(const std::string label) {
+void CodeWriter::writeIf(const std::string &label) {
   file << "@SP\n" << "AM=M-1\n" << "D=M\n" << "@" << label << "\nD;JNE\n";
 }
 
-void CodeWriter::writeFunction(const std::string functionName, int nArgs) {
+void CodeWriter::writeFunction(const std::string &functionName, int nVars) {
   file << "(" << functionName << ")\n";
-  for (int i = 0; i < nArgs; i++) {
+  for (int i = 0; i < nVars; i++) {
     file << "@0\n"
          << "D=A\n"
          << "@SP\n"
@@ -311,4 +313,39 @@ void CodeWriter::writeFunction(const std::string functionName, int nArgs) {
          << "@SP\n"
          << "M=M+1\n";
   }
+}
+
+void CodeWriter::writeCall(const std::string &functionName, int nArgs) {
+  // @RET_0
+  // D=A
+  // @SP
+  // A=M
+  // M=D
+  // @SP
+  // M=M+1
+  file << "@RET_" << returnCounter << "\nD=A\n"
+       << "@SP\n"
+       << "A=M\n"
+       << "M=D\n"
+       << "@SP\n"
+       << "M=M+1\n";
+  // push LCL, ARG, THIS, THAT
+  std::string commonInsts = "D=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";
+  file << "@LCL\n" << commonInsts;
+  file << "@ARG\n" << commonInsts;
+  file << "@THIS\n" << commonInsts;
+  file << "@THAT\n" << commonInsts;
+  // ARG = SP - nArgs - 5
+  file << "@SP\n"
+       << "D=M\n"
+       << "@" << (nArgs + 5) << "\nD=D-A\n"
+       << "@ARG\n"
+       << "M=D\n";
+  // LCL = SP
+  file << "@SP\n" << "D=M\n" << "@LCL\n" << "M=D\n";
+  // goto functionName
+  file << "@" << functionName << "\n0;JMP\n";
+  // (returnAddress)
+  file << "(RET_" << returnCounter << ")\n";
+  returnCounter++;
 }
