@@ -288,14 +288,27 @@ void CodeWriter::emitCompOperation(std::string op) {
   labelCounter++;
 }
 
-void CodeWriter::writeLabel(std::string label) {
+void CodeWriter::writeLabel(const std::string label) {
   file << "(" << label << ")\n";
 }
 
-void CodeWriter::writeGoto(std::string label) {
+void CodeWriter::writeGoto(const std::string label) {
   file << "@" << label << "\n0;JMP\n";
 }
 
-void CodeWriter::writeIf(std::string label) {
+void CodeWriter::writeIf(const std::string label) {
   file << "@SP\n" << "AM=M-1\n" << "D=M\n" << "@" << label << "\nD;JNE\n";
+}
+
+void CodeWriter::writeFunction(const std::string functionName, int nArgs) {
+  file << "(" << functionName << ")\n";
+  for (int i = 0; i < nArgs; i++) {
+    file << "@0\n"
+         << "D=A\n"
+         << "@SP\n"
+         << "A=M\n"
+         << "M=D\n"
+         << "@SP\n"
+         << "M=M+1\n";
+  }
 }
