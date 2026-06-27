@@ -41,21 +41,6 @@ void CodeWriter::WriteArithmetic(const std::string &command) {
 void CodeWriter::WritePushPop(CMD_TYPE command, const std::string &segment,
                               int i) {
 
-  std::string filename = outputFile;
-
-  size_t slashPos = filename.find_last_of('/');
-  if (slashPos != std::string::npos) {
-    filename = filename.substr(slashPos + 1);
-  }
-
-  size_t dotPos = filename.find_last_of('.');
-  if (dotPos != std::string::npos) {
-    filename = filename.substr(0, dotPos);
-  } else {
-    std::cerr << "Error creating static instruction symbol" << std::endl;
-    throw std::runtime_error("Error creating static instruction symbol");
-  }
-
   std::string base;
   if (segment == "local") {
     base = "LCL";
@@ -123,7 +108,7 @@ void CodeWriter::WritePushPop(CMD_TYPE command, const std::string &segment,
       // M = D
       // @SP
       // M = M + 1
-      file << "@" << filename << "." << i << "\nD=M\n"
+      file << "@" << currentFileName << "." << i << "\nD=M\n"
            << "@SP\n"
            << "A=M\n"
            << "M=D\n"
@@ -196,7 +181,7 @@ void CodeWriter::WritePushPop(CMD_TYPE command, const std::string &segment,
       file << "@SP\n"
            << "AM=M-1\n"
            << "D=M\n"
-           << "@" << filename << "." << i << "\nM=D\n";
+           << "@" << currentFileName << "." << i << "\nM=D\n";
     }
     // @segment
     // D=M
@@ -291,18 +276,24 @@ void CodeWriter::emitCompOperation(const std::string &op) {
 }
 
 void CodeWriter::writeLabel(const std::string &label) {
-  file << "(" << label << ")\n";
+  file << "(" << currentFunction << "$" << label << ")\n";
 }
 
 void CodeWriter::writeGoto(const std::string &label) {
-  file << "@" << label << "\n0;JMP\n";
+  file << "@" << currentFunction << "$" << label << "\n"
+       << "0;JMP\n";
 }
 
 void CodeWriter::writeIf(const std::string &label) {
-  file << "@SP\n" << "AM=M-1\n" << "D=M\n" << "@" << label << "\nD;JNE\n";
+  file << "@SP\n"
+       << "AM=M-1\n"
+       << "D=M\n"
+       << "@" << currentFunction << "$" << label << "\nD;JNE\n";
 }
 
 void CodeWriter::writeFunction(const std::string &functionName, int nVars) {
+  currentFunction = functionName;
+
   file << "(" << functionName << ")\n";
   for (int i = 0; i < nVars; i++) {
     file << "@0\n"
@@ -316,6 +307,12 @@ void CodeWriter::writeFunction(const std::string &functionName, int nVars) {
 }
 
 void CodeWriter::writeCall(const std::string &functionName, int nArgs) {
+  std::string retLabel;
+  if (currentFunction.empty())
+    retLabel = "BOOTSTRAP$ret." + std::to_string(returnCounter);
+  else
+    retLabel = currentFunction + "$ret." + std::to_string(returnCounter);
+
   // @RET_0
   // D=A
   // @SP
@@ -323,14 +320,14 @@ void CodeWriter::writeCall(const std::string &functionName, int nArgs) {
   // M=D
   // @SP
   // M=M+1
-  file << "@RET_" << returnCounter << "\nD=A\n"
+  file << "@" << retLabel << "\nD=A\n"
        << "@SP\n"
        << "A=M\n"
        << "M=D\n"
        << "@SP\n"
        << "M=M+1\n";
   // push LCL, ARG, THIS, THAT
-  std::string commonInsts = "D=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";
+  const std::string commonInsts = "D=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";
   file << "@LCL\n" << commonInsts;
   file << "@ARG\n" << commonInsts;
   file << "@THIS\n" << commonInsts;
@@ -346,6 +343,66 @@ void CodeWriter::writeCall(const std::string &functionName, int nArgs) {
   // goto functionName
   file << "@" << functionName << "\n0;JMP\n";
   // (returnAddress)
-  file << "(RET_" << returnCounter << ")\n";
+  file << "(" << retLabel << ")\n";
   returnCounter++;
+}
+
+void CodeWriter::writeReturn() {
+  // save LCL
+  file << "@LCL\n" << "D=M\n" << "@R13\n" << "M=D\n";
+  // ret_address [R14] = *(endFrame [R13] - 5)
+  file << "@R13\n"
+       << "D=M\n"
+       << "@5\n"
+       << "A=D-A\n"
+       << "D=M\n"
+       << "@R14\n"
+       << "M=D\n";
+  // *ARG = pop()
+  file << "@SP\n" << "AM=M-1\n" << "D=M\n" << "@ARG\n" << "A=M\n" << "M=D\n";
+  // SP = ARG + 1
+  file << "@ARG\n" << "D=M+1\n" << "@SP\n" << "M=D\n";
+  // THAT = *(endFrame[R13] - 1)
+  file << "@R13\n"
+       << "D=M\n"
+       << "@1\n"
+       << "A=D-A\n"
+       << "D=M\n"
+       << "@THAT\n"
+       << "M=D\n";
+  // THIS = *(endFrame[R13] - 2)
+  file << "@R13\n"
+       << "D=M\n"
+       << "@2\n"
+       << "A=D-A\n"
+       << "D=M\n"
+       << "@THIS\n"
+       << "M=D\n";
+  // ARG = *(endFrame[R13] - 3)
+  file << "@R13\n"
+       << "D=M\n"
+       << "@3\n"
+       << "A=D-A\n"
+       << "D=M\n"
+       << "@ARG\n"
+       << "M=D\n";
+  // LCL = *(endFrame[R13] - 4)
+  file << "@R13\n"
+       << "D=M\n"
+       << "@4\n"
+       << "A=D-A\n"
+       << "D=M\n"
+       << "@LCL\n"
+       << "M=D\n";
+  // goto retAddr [R14]
+  file << "@R14\n" << "A=M\n" << "0;JMP\n";
+}
+
+void CodeWriter::writeInit() {
+  file << "@256\n"
+       << "D=A\n"
+       << "@SP\n"
+       << "M=D\n";
+
+  writeCall("Sys.init", 0);
 }

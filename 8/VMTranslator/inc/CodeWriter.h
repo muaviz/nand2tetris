@@ -16,6 +16,8 @@ public:
   void writeIf(const std::string &label);
   void writeFunction(const std::string &functionName, int nVars);
   void writeCall(const std::string &functionName, int nArgs);
+  void writeReturn();
+  void writeInit();
 
 private:
   std::ofstream file;
@@ -23,4 +25,5 @@ private:
   int labelCounter;
   int returnCounter;
   std::string currentFileName;
+  std::string currentFunction;
 };

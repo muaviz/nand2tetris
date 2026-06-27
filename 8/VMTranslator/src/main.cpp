@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-void TranslationHandler(std::filesystem::path src, CodeWriter &C);
+void TranslationHandler(const std::filesystem::path &src, CodeWriter &C);
 
 int main(int argc, char *argv[]) {
   (void)argv;
@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
         VM_srcs.push_back(entry.path());
       }
     }
+    C.writeInit();
     for (const auto &entry : VM_srcs) {
       C.setFileName(entry.stem().string());
       TranslationHandler(entry, C);
@@ -49,7 +50,7 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
-void TranslationHandler(std::filesystem::path src, CodeWriter &C) {
+void TranslationHandler(const std::filesystem::path &src, CodeWriter &C) {
   Parser P(src);
 
   while (P.hasMoreCommands()) {
@@ -67,6 +68,12 @@ void TranslationHandler(std::filesystem::path src, CodeWriter &C) {
       C.writeGoto(P.arg1());
     } else if (type == CMD_TYPE::C_IF) {
       C.writeIf(P.arg1());
+    } else if (type == CMD_TYPE::C_FUNCTION) {
+      C.writeFunction(P.arg1(), P.arg2());
+    } else if (type == CMD_TYPE::C_CALL) {
+      C.writeCall(P.arg1(), P.arg2());
+    } else if (type == CMD_TYPE::C_RETURN) {
+      C.writeReturn();
     }
   }
 }
