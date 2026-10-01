@@ -24,6 +24,10 @@ class Dajjal {
         do Screen.drawCircle(x + (width / 2), y + (height / 2), 4);
         do Screen.setColor(true);
         do Screen.drawCircle(x + (width / 2), y + (height / 2), 1);
+        do Screen.drawLine(x, y, x - 4, y - 6);
+        do Screen.drawLine(x + 1, y, x - 3, y - 6);
+        do Screen.drawLine(x + width, y, x + width + 4, y - 6);
+        do Screen.drawLine(x + width - 1, y, x + width + 3, y - 6);
 
         return;
     }
@@ -31,6 +35,10 @@ class Dajjal {
     method void hide() {
         do Screen.setColor(false);
         do Screen.drawRectangle(x, y, x + width, y + height);
+        do Screen.drawLine(x, y, x - 4, y - 6);
+        do Screen.drawLine(x + 1, y, x - 3, y - 6);
+        do Screen.drawLine(x + width, y, x + width + 4, y - 6);
+        do Screen.drawLine(x + width - 1, y, x + width + 3, y - 6);
 
         return;
     }
