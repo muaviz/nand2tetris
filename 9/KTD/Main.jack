@@ -1,0 +1,11 @@
+/** Initialises a new KTDGame and starts running it. */
+Class Main {
+    function void main() {
+        var KTDGame game;
+        do KTDGame.newInstance();
+        let game = KTDGame.getInstance();
+        do game.run();
+        do game.dispose();
+        return;
+    }
+}

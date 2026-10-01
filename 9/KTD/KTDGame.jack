@@ -1,0 +1,67 @@
+/*
+ * Represents a KTD Game
+ */
+class KTDGame {
+    static KTDGame instance;
+    field Dajjal dajjal;
+    field Crosshair crosshair;
+    field boolean exit;
+    field int score;
+
+    constructor KTDGame new() {
+        do Screen.clearScreen();
+        let crosshair = Crosshair.new(0, 0);
+        let dajjal = Dajjal.new(255, 120);
+        do Screen.drawRectangle(0, 238, 511, 240);
+        do Output.moveCursor(22,0);
+        do Output.printString("Score: 0");
+
+        let exit = false;
+        let score = 0;
+
+        return this;
+    }
+
+    /** Deallocated the object's memory */
+    method void dispose() {
+        do dajjal.dispose();
+        do crosshair.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Creates an instance of a KTD game. */
+    function void newInstance() {
+        let instance = KTDGame.new();
+        return;
+    }
+
+    /** Returns this KTD game. */
+    function KTDGame getInstance() {
+        return this;
+    }
+
+    method void run() {
+        var char key;
+
+        while (~exit) {
+            // Loop while no key is pressed
+            while ((key = 0) & (~exit)) {
+                let key = Keyboard.keyPressed();
+            }
+        }
+    }
+}
+
+Score
+
+Cursor:
+owns: position, body
+does: move, draw
+
+Dajjal:
+owns: position, body
+does: spawn, draw
+
+Game:
+does: start, read keyboard, check curson-dajjal collision, update score, check game over, draw everything, control game state

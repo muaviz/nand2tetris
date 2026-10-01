@@ -1,0 +1,28 @@
+class Random {
+    static int seed;
+
+    function void setSeed(int newSeed) {
+        let seed = newSeed;
+        return;
+    }
+
+    function int rand() {
+        let seed = seed * 205 + 505;
+        let seed = seed & 32767;
+        return seed;
+    }
+
+    function int randRange(int min, int max) {
+        var int range;
+        var int mod;
+        var int result;
+        var int randVal;
+
+        let randVal = Random.rand();
+
+        let range = (max - min) + 1;
+        let mod = randVal - ((randVal / range) * range);
+        let result = min + mod;
+        return result;
+    }
+}

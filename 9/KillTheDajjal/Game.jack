@@ -1,0 +1,115 @@
+class Game {
+    static Game instance;
+    field Crosshair crosshair;
+    field Dajjal dajjal;
+    field int score;
+    field int timeLeft;
+    field int ticks;
+    field boolean exit;
+
+    constructor Game new() {
+        do Screen.clearScreen();
+
+        let score = 0;
+        let timeLeft = 20;
+        let ticks = 0;
+        let exit = false;
+
+        do Random.setSeed(1234);
+
+        let crosshair = Crosshair.new(256, 128);
+        let dajjal = Dajjal.new(100, 100);
+
+        do Screen.drawLine(0, 25, 511, 25);
+        do Output.moveCursor(0, 1);
+        do Output.printString("Score: 0");
+        do Output.moveCursor(0, 25);
+        do Output.printString("Time: 20");
+        do Output.moveCursor(0, 45);
+        do Output.printString("Vim: [h j k l]");
+
+        return this;
+    }
+
+    method void dispose() {
+        do crosshair.dispose();
+        do dajjal.dispose();
+        do Memory.deAlloc(this);
+
+        return;
+    }
+
+    function void newInstance() {
+        let instance = Game.new();
+        return;
+    }
+
+    function Game getInstance() {
+        return instance;
+    }
+
+    method void run() {
+        var char key;
+        var int randX;
+        var int randY;
+
+        while (~exit) {
+
+            let ticks = ticks + 1;
+            if (ticks = 33) {
+                let ticks = 0;
+                let timeLeft = timeLeft - 1;
+
+                do Output.moveCursor(0, 31);
+                do Output.printInt(timeLeft);
+                if (timeLeft < 10) {
+                    do Output.printString(" ");
+                }
+
+                if (timeLeft = 0) {
+                    let exit = true;
+                }
+            }
+
+
+            let key = Keyboard.keyPressed();
+
+            if ((key = 104) | (key = 72)) {
+                do crosshair.moveLeft();
+            }
+            if ((key = 106) | (key = 74)) {
+                do crosshair.moveDown();
+            }
+            if ((key = 107) | (key = 75)) {
+                do crosshair.moveUp();
+            }
+            if ((key = 108) | (key = 76)) {
+                do crosshair.moveRight();
+            }
+            if ((key = 113) | (key = 140)) {
+                let exit = true;
+            }
+
+            if (dajjal.checkHit(crosshair.getX(), crosshair.getY())) {
+                let score = score + 1;
+
+                do Output.moveCursor(0, 8);
+                do Output.printInt(score);
+
+                let randX = Random.randRange(20, 470);
+                let randY = Random.randRange(40, 210);
+                do dajjal.spawn(randX, randY);
+            }
+
+            do Sys.wait(30);
+        }
+        do Screen.clearScreen();
+        do Output.moveCursor(10, 25);
+        do Output.printString("GAME OVER!");
+        do Output.moveCursor(12, 23);
+        do Output.printString("Final Score: ");
+        do Output.printInt(score);
+
+        return;
+    }
+}

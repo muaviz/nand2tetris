@@ -1,0 +1,7 @@
+class Hello {
+    function void main() {
+        do Output.printString("Hello");
+        do Output.println();
+        return;
+      }
+  }
