@@ -1,3 +1,4 @@
+#include "CompilationEngine.h"
 #include "JackTokenizer.h"
 #include <filesystem>
 #include <fstream>
@@ -44,30 +45,30 @@ void processFiles(const std::filesystem::path &originalPath) {
   auto outputPath = parent / (stem + ".xml");
 
   JackTokenizer tokenizer(originalPath);
-  std::ofstream outputFile(tokensOutputPath);
+  std::ofstream outputFile(outputPath);
   if (!outputFile.is_open()) {
     std::cerr << "Failed to open output file!" << std::endl;
   }
 
-  outputFile << "<tokens>\n";
-
-  while (tokenizer.hasMoreTokens()) {
-    tokenizer.advance();
-
-    TOKEN_TYPE type = tokenizer.tokenType();
-    std::string_view typeTag = tokenTypeToXmlTag(type);
-
-    std::string tokenValue = tokenizer.tokenString();
-
-    if (type == TOKEN_TYPE::SYMBOL) {
-      tokenValue = escapeXML(tokenizer.symbol());
-    }
-
-    outputFile << "<" << typeTag << "> " << tokenValue << " </" << typeTag
-               << ">\n";
+  if (tokenizer.hasMoreTokens()) {
+    // TOKEN_TYPE type = tokenizer.tokenType();
+    // std::string_view typeTag = tokenTypeToXmlTag(type);
+    //
+    // std::string tokenValue = tokenizer.tokenString();
+    //
+    // if (type == TOKEN_TYPE::SYMBOL) {
+    //   tokenValue = escapeXML(tokenizer.symbol());
+    // }
+    //
+    // outputFile << "<" << typeTag << "> " << tokenValue << " </" << typeTag
+    //            << ">\n";
   }
 
-  outputFile << "</tokens>\n";
+  tokenizer.advance();
+
+  CompilationEngine engine(tokenizer, outputFile);
+  engine.compileClass();
+
   outputFile.close();
 }
 
@@ -85,19 +86,4 @@ std::string_view tokenTypeToXmlTag(TOKEN_TYPE type) {
     return "stringConstant";
   }
   return "";
-}
-
-std::string escapeXML(char c) {
-  switch (c) {
-  case '<':
-    return "&lt;";
-  case '>':
-    return "&gt;";
-  case '&':
-    return "&amp;";
-  case '"':
-    return "&quot;";
-  default:
-    return std::string(1, c);
-  }
 }

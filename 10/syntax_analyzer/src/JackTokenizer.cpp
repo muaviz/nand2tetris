@@ -105,6 +105,23 @@ int JackTokenizer::intVal() const { return std::stoi(m_tokenString); }
 
 const std::string &JackTokenizer::stringVal() const { return m_tokenString; }
 
+std::string JackTokenizer::peekNextToken() {
+  size_t savedCursor = m_cursor;
+  std::string savedTokenString = m_tokenString;
+  TOKEN_TYPE savedTokenType = m_tokenType;
+  KEYWORD_TYPE savedKeyword = m_keyword;
+
+  advance();
+
+  std::string nextToken = m_tokenString;
+  m_cursor = savedCursor;
+  m_tokenString = savedTokenString;
+  m_tokenType = savedTokenType;
+  m_keyword = savedKeyword;
+
+  return nextToken;
+}
+
 void JackTokenizer::skipTrivials() {
   while (m_cursor < m_source.size()) {
 

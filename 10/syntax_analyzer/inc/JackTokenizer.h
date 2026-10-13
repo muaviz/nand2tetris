@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 
 enum class TOKEN_TYPE { KEYWORD, SYMBOL, IDENTIFIER, INT_CONST, STRING_CONST };
@@ -38,6 +39,7 @@ public:
   const std::string &identifier() const;
   int intVal() const;
   const std::string &stringVal() const;
+  std::string peekNextToken();
 
 private:
   std::string m_source;

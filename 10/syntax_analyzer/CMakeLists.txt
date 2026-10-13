@@ -28,6 +28,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_executable(syntaxanalyzer
     src/main.cpp
     src/JackTokenizer.cpp
+    src/CompilationEngine.cpp
     # Add other .cpp files here as you create them:
     # src/parser.cpp
     # src/code_writer.cpp
